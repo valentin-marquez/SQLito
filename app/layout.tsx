@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   keywords: ["Supabase", "AI", "SQL", "Business Intelligence", "Model Context Protocol", "SQLito"],
   authors: [{ name: "SQLito Team" }],
   icons: {
-    icon: "/favicon.ico",
+    icon: "/favicon.svg",
   },
   openGraph: {
     title: "SQLito - Business Intelligence for Tech-Challenged Bosses",
@@ -47,7 +47,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" suppressHydrationWarning>
-      <head />
+      <head>
+        <script crossOrigin="anonymous" src="//unpkg.com/react-scan/dist/auto.global.js" />
+      </head>
       <body
         className={cn(
           "min-h-screen bg-sidebar font-mono antialiased",

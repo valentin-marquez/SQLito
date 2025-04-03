@@ -138,6 +138,15 @@
     @apply bg-background text-foreground;
   }
 
+  .grid-pattern {
+    @apply bg-[size:10ch_1.5rem] bg-[image:linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)];
+  }
+  
+  .grid-pattern-monospace {
+    @apply bg-[size:8ch_1.25rem] bg-[image:linear-gradient(to_right,var(--border)_0.5px,transparent_0.5px),linear-gradient(to_bottom,var(--border)_0.5px,transparent_0.5px)];
+    background-position: 0 0;
+    image-rendering: crisp-edges;
+  }
   
   .rounded-xs,
   .rounded-sm,

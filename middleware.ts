@@ -11,11 +11,12 @@ export async function middleware(request: NextRequest) {
   );
 
   if (isProtectedPath) {
-    // Check if the user is authenticated
+    // Check if the user is authenticated via httpOnly cookie or client cookie
     const accessToken = request.cookies.get("supabase_access_token")?.value;
+    const authStatus = request.cookies.get("sqlito_auth_status")?.value;
 
-    // If token doesn't exist, redirect to login
-    if (!accessToken) {
+    // If neither token exists, redirect to login
+    if (!accessToken && authStatus !== "authenticated") {
       const url = new URL("/", request.url);
       return NextResponse.redirect(url);
     }

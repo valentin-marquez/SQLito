@@ -1,8 +1,12 @@
+import { SupabaseManagement } from "@/_lib/services/supabase-management";
+import type { ErrorResponse, Project } from "@/_lib/types/supabase-api";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { SupabaseManagementAPI } from "supabase-management-js";
 
-export async function GET(request: Request, { params }: { params: { orgId: string } }) {
+export async function GET(
+  request: Request,
+  { params }: { params: { orgId: string } }
+): Promise<NextResponse<Project[] | ErrorResponse>> {
   try {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get("supabase_access_token")?.value;
@@ -11,28 +15,17 @@ export async function GET(request: Request, { params }: { params: { orgId: strin
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const client = new SupabaseManagementAPI({ accessToken });
-    const projects = await client.getProjects().then((projects) => {
-      if (!projects) {
-        return [];
-      }
-      return projects.map((project) => ({
-        id: project.id,
-        organization_id: project.organization_id,
-        name: project.name,
-        region: project.region,
-        created_at: project.created_at,
-        database: project.database
-          ? { host: project.database.host, version: project.database.version }
-          : undefined,
-      }));
-    });
+    const orgId = params.orgId;
+    const supabaseManagement = new SupabaseManagement(accessToken);
+
+    // Use the service to get projects
+    const projects = await supabaseManagement.getProjects(orgId !== "all" ? orgId : undefined);
 
     return NextResponse.json(projects);
   } catch (error) {
     console.error("Failed to fetch projects:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
+      { error: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }

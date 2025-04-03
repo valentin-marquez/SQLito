@@ -10,6 +10,7 @@ import {
 import { Input } from "@/_components/ui/input";
 import { Label } from "@/_components/ui/label";
 import { Loader } from "@/_components/ui/loader";
+import { useDatabaseStore } from "@/_lib/stores";
 import { AlertCircle } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
@@ -24,6 +25,9 @@ export const ApiKeyModal = ({ open, onClose }: ApiKeyModalProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Use the database store to access and update the API key
+  const { setAnthropicApiKey } = useDatabaseStore();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -36,17 +40,15 @@ export const ApiKeyModal = ({ open, onClose }: ApiKeyModalProps) => {
     setError("");
 
     try {
-      // Simulates a basic key validation
-      // In a real case, this would make a request to the Anthropic API
-      // to verify that the key is valid
+      // Validate API key
       const isValidKey = apiKey.startsWith("sk-ant-");
 
       if (!isValidKey) {
         throw new Error("The API key must start with 'sk-ant-'");
       }
 
-      // Store the key in localStorage
-      localStorage.setItem("anthropic_api_key", apiKey);
+      // Store the key only in the Zustand store
+      setAnthropicApiKey(apiKey);
 
       // Wait a brief moment to simulate verification
       await new Promise((resolve) => setTimeout(resolve, 800));

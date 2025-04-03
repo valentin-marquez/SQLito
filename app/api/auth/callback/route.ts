@@ -65,12 +65,23 @@ export async function GET(request: NextRequest) {
       sameSite: "lax",
     });
 
+    // Set a non-HttpOnly cookie to indicate authentication status to the client
+    // This is safe because it doesn't contain the actual token
+    cookiesStore.set("sqlito_auth_status", "authenticated", {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: tokens.expires_in,
+      path: "/",
+      sameSite: "lax",
+    });
+
     // Clean up the temporary cookies
     cookiesStore.delete("code_verifier");
     cookiesStore.delete("oauth_state");
 
-    // Redirect to the dashboard
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    // Redirect to the dashboard without token in URL
+    const dashboardUrl = new URL("/dashboard", request.url);
+    return NextResponse.redirect(dashboardUrl);
   } catch (error) {
     console.error("Failed to exchange code for tokens:", error);
     return NextResponse.redirect(new URL("/auth/error?error=server_error", request.url));

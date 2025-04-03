@@ -6,13 +6,22 @@ export async function GET() {
   const refreshToken = cookiesStore.get("supabase_refresh_token")?.value;
 
   if (!refreshToken) {
-    return NextResponse.json({ error: "No refresh token found" }, { status: 401 });
+    console.log("Refresh failed: No refresh token found in cookies");
+    return NextResponse.json({ error: "No refresh token found", success: false }, { status: 401 });
   }
 
   try {
     const tokenEndpoint = "https://api.supabase.com/v1/oauth/token";
     const clientId = process.env.SUPABASE_OAUTH_CLIENT_ID || "";
     const clientSecret = process.env.SUPABASE_OAUTH_CLIENT_SECRET || "";
+
+    if (!clientId || !clientSecret) {
+      console.error("Missing OAuth client credentials");
+      return NextResponse.json(
+        { error: "Server configuration error", success: false },
+        { status: 500 }
+      );
+    }
 
     const response = await fetch(tokenEndpoint, {
       method: "POST",
@@ -28,9 +37,19 @@ export async function GET() {
     });
 
     if (!response.ok) {
-      const error = await response.text();
-      console.error("Token refresh failed:", error);
-      return NextResponse.json({ error: "Failed to refresh token" }, { status: 401 });
+      const errorText = await response.text();
+      console.error("Token refresh failed:", errorText, "Status:", response.status);
+
+      // If refresh token is invalid, clear cookies to prevent future failed attempts
+      if (response.status === 400 || response.status === 401) {
+        cookiesStore.delete("supabase_access_token");
+        cookiesStore.delete("supabase_refresh_token");
+      }
+
+      return NextResponse.json(
+        { error: "Failed to refresh token", success: false, details: errorText },
+        { status: 401 }
+      );
     }
 
     const tokens = await response.json();
@@ -56,6 +75,7 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
+      access_token: tokens.access_token, // Send token back to client for direct use
       cookies: {
         access_token: {
           value: tokens.access_token,
@@ -71,6 +91,6 @@ export async function GET() {
     });
   } catch (error) {
     console.error("Failed to refresh tokens:", error);
-    return NextResponse.json({ error: "Failed to refresh token" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to refresh token", success: false }, { status: 500 });
   }
 }
