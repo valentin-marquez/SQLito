@@ -1,7 +1,7 @@
 "use client";
 
 import { ApiKeyModal } from "@/_components/api-key-modal";
-import { ProjectPasswordModal } from "@/_components/project-password-modal";
+import { useSQLChat } from "@/_lib/hooks/useSQLChat";
 import {
   useAuthStore,
   useDatabaseStore,
@@ -19,28 +19,15 @@ export default function ChatPage() {
   const { isAuthenticated, loading: authLoading, checkAuth } = useAuthStore();
   const { selectedOrganizationId, fetchOrganizations } = useOrganizationsStore();
   const {
-    projects,
-    selectedProjectRef,
-    loading: projectsLoading,
     fetchProjects,
-    selectProject,
   } = useProjectsStore();
-  const {
-    messages,
-    isLoadingMessage,
-    anthropicApiKey,
-    apiKeyModalOpen,
-    passwordModalOpen,
-    setApiKeyModalOpen,
-    sendMessage,
-    copyMessageToClipboard,
-    deleteMessage,
-    regenerateResponse,
-    clearMessages,
-    handleApiKeySubmit,
-  } = useDatabaseStore();
 
-  const chatIsEmpty = messages.length === 0 && !isLoadingMessage;
+  const { anthropicApiKey, apiKeyModalOpen, setApiKeyModalOpen, handleApiKeySubmit } =
+    useDatabaseStore();
+
+  // Use our new chat hook
+  const { messages, status } = useSQLChat();
+  const chatIsEmpty = messages.length === 0 && status !== "streaming";
 
   // Check authentication on component mount
   useEffect(() => {
@@ -72,12 +59,6 @@ export default function ChatPage() {
     fetchProjects(selectedOrganizationId);
   }, [selectedOrganizationId, fetchProjects]);
 
-  // Remove the auto-selection effect that selects the initial project
-  useEffect(() => {
-    // Removed automatic selection
-    // selectInitialProject() - don't call this anymore
-  }, [projects]);
-
   // Check if API key is configured
   useEffect(() => {
     if (authLoading || !isAuthenticated) return;
@@ -85,41 +66,6 @@ export default function ChatPage() {
       setApiKeyModalOpen(true);
     }
   }, [authLoading, isAuthenticated, anthropicApiKey, setApiKeyModalOpen]);
-
-  // Enhanced debugging for project and database synchronization
-  useEffect(() => {
-    console.log("State check:", {
-      projectStoreRef: selectedProjectRef,
-      dbStoreRef: useDatabaseStore.getState().projectRef,
-      connectionString: useDatabaseStore.getState().connectionString ? "exists" : "none",
-      projectsCount: projects.length,
-    });
-
-    // If there's a mismatch between stores, fix it
-    const dbRef = useDatabaseStore.getState().projectRef;
-    if (selectedProjectRef && dbRef !== selectedProjectRef) {
-      console.log("Fixing store mismatch - updating database store:", selectedProjectRef);
-      useDatabaseStore.getState().setProjectRef(selectedProjectRef);
-    } else if (!selectedProjectRef && dbRef) {
-      console.log("Fixing store mismatch - updating project store:", dbRef);
-      selectProject(dbRef);
-    }
-  }, [selectedProjectRef, projects]);
-
-  // Handle initial project selection when projects are loaded - don't auto-select
-  useEffect(() => {
-    if (!projects.length) return;
-
-    console.log("Projects loaded check:", {
-      count: projects.length,
-      selectedRef: selectedProjectRef,
-      dbRef: useDatabaseStore.getState().projectRef,
-      firstProject: projects[0] ? { id: projects[0].id, name: projects[0].name } : null,
-    });
-
-    // Don't auto-select projects - require user to make an explicit choice
-    // Previous auto-selection code removed
-  }, [projects]);
 
   if (authLoading) {
     return <LoadingScreen />;
@@ -141,11 +87,6 @@ export default function ChatPage() {
             setApiKeyModalOpen(false);
           }
         }}
-      />
-
-      <ProjectPasswordModal
-        open={passwordModalOpen}
-        onClose={() => useDatabaseStore.getState().setPasswordModalOpen(false)}
       />
 
       <div className="flex flex-col h-screen w-full relative">
@@ -176,7 +117,7 @@ export default function ChatPage() {
               `}
             >
               {chatIsEmpty && <WelcomeScreen />}
-              <InputArea onSend={sendMessage} />
+              <InputArea />
 
               <div className="space-y-4 mt-4">
                 <p className="text-xs text-muted-foreground text-center font-mono border border-dashed p-2 bg-muted/30">

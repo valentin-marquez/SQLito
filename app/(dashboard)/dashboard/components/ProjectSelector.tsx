@@ -10,7 +10,6 @@ import {
 } from "@/_components/ui/select";
 import { useDatabaseStore, useProjectsStore } from "@/_lib/stores";
 import type { Project } from "@/_lib/types/supabase-api";
-import { Key } from "lucide-react";
 import { useEffect } from "react";
 
 interface ProjectSelectorProps {
@@ -93,8 +92,7 @@ export function ProjectSelector({
             <>
               <SelectGroup>
                 <SelectLabel className="px-2 py-1.5 text-[10px] flex items-center gap-1">
-                  <Key className="h-3 w-3" />
-                  <span>Password required for connection</span>
+                  <span>Select a project</span>
                 </SelectLabel>
                 {projects.map((project) => (
                   <SelectItem key={`project-${project.id}`} value={project.id} className="py-2">

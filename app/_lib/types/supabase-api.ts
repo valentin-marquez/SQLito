@@ -69,21 +69,6 @@ export type ErrorResponse = {
   message?: string;
 };
 
-export interface DatabaseBranch {
-  id: string;
-  name: string;
-  project_ref: string;
-  parent_project_ref: string;
-  is_default: boolean;
-  git_branch: string;
-  pr_number: number;
-  latest_check_run_id: number;
-  persistent: boolean;
-  status: string;
-  created_at: string;
-  updated_at: string;
-}
-
 export interface DatabaseBranchConfig {
   ref: string;
   postgres_version: string;

@@ -5,7 +5,8 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   request: Request,
-  { params }: { params: { orgId: string } }
+  // { params }: { params: { orgId: string } }
+  { params }: { params: Promise<{ orgId: string }> }
 ): Promise<NextResponse<Project[] | ErrorResponse>> {
   try {
     const cookieStore = await cookies();
@@ -15,7 +16,7 @@ export async function GET(
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const orgId = params.orgId;
+    const { orgId } = await params;
     const supabaseManagement = new SupabaseManagement(accessToken);
 
     // Use the service to get projects

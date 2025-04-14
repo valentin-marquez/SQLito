@@ -1,9 +1,8 @@
 @import "tailwindcss";
-
+@plugin "@tailwindcss/typography";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
-
 
 @custom-variant dark (&:is(.dark *));
 
@@ -47,9 +46,6 @@
   --text-lg: 1.05rem;
   --text-base: 0.85rem;
   --text-sm: 0.8rem;
-
-
-
 
 }
 
@@ -141,13 +137,13 @@
   .grid-pattern {
     @apply bg-[size:10ch_1.5rem] bg-[image:linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)];
   }
-  
+
   .grid-pattern-monospace {
     @apply bg-[size:8ch_1.25rem] bg-[image:linear-gradient(to_right,var(--border)_0.5px,transparent_0.5px),linear-gradient(to_bottom,var(--border)_0.5px,transparent_0.5px)];
     background-position: 0 0;
     image-rendering: crisp-edges;
   }
-  
+
   .rounded-xs,
   .rounded-sm,
   .rounded-md,
@@ -170,8 +166,6 @@
     @apply !rounded-none !shadow-none;
   }
 
-  
-
 [data-slot="card"],
 [data-slot="input"],
 [data-slot="textarea"],
@@ -190,12 +184,11 @@
   animation-duration: 0.4s;
   animation-fill-mode: both;
 
-  
 }
 
 ::view-transition-old(root) {
   animation-name: slide-out;
- 
+
 }
 
 ::view-transition-new(root) {

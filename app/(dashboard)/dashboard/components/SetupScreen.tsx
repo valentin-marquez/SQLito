@@ -14,7 +14,7 @@ export function SetupScreen({ onConfigure }: SetupScreenProps) {
         </p>
         <ul className="text-sm text-muted-foreground mb-6 font-mono list-disc text-left max-w-xs mx-auto">
           <li>A Claude API key (Anthropic) for natural language processing</li>
-          <li>Database passwords for your Supabase projects</li>
+          <li>Select a Supabase project to connect to</li>
         </ul>
         <Button onClick={onConfigure} className="font-mono border border-dashed">
           Configure Settings
